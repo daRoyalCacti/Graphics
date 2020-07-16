@@ -378,7 +378,7 @@ namespace files {
     } //end outer loop
 
     alldata.reset();
-    //std::vector<std::vector<std::vector<Vertex>>>().swap(m_Vertices); //!!!must be here or else std::bad_alloc returnsis thrown -- NO IDEA WHY
+    //std::vector<std::vector<std::vector<Vertex>>>().swap(m_Vertices); //!!!must be here or else std::bad_alloc is thrown -- NO IDEA WHY
     //std::vector<std::vector<Vertex>>().swap(Vertices);
     //std::vector<std::vector<uint32_t>>().swap(Indicies);
 
