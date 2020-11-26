@@ -10,7 +10,12 @@
 #include <stdexcept>		//to throw runtime errors
 #include <set>					//for std::set
 #include "../global.h"			//for most preprocessor definitions seen -- mainly timing, detailed_timing, NODEBUG, gore_detail
+
+#ifndef testing3
 #include "../file_reading/data.h"				//for all the data reading functions -- called in the 'loadData' function
+#else
+#include "../file_reading/asset_loading.h"
+#endif
 
 #include "../../General_Graphics/player_camera.h"		//for camera vectors and for MVP matrices
 #include "../vulkan_general/decriptorSetLayout.h"		//helper functions for creating the descriptor set layout
@@ -56,6 +61,11 @@ namespace global {
 	#endif
 }
 
+namespace error {
+	bool was_error_data = false;
+	std::string data_message;
+}
+
 #ifdef NODEBUG
 const bool enableValidationLayers = false;
 #else
@@ -68,6 +78,7 @@ void vulkanApp::loadData() {
 	auto start = std::chrono::steady_clock::now();
 #endif
 
+	#ifndef testing3
 	std::future<uint32_t> mesh_no = std::async(&files::read_Simple_Static_mesh);
 
 	std::future<uint32_t> m_mesh_no = std::async(&files::read_Simple_Moving_mesh);
@@ -106,6 +117,7 @@ void vulkanApp::loadData() {
 																							//cannot be read async because it depends on the values read for the meshes
 																							//wouldn't be any point because it stupid fast
 
+
 	staticMeshes = std::make_unique<staticSimpleMesh[]>(no_mesh);
 	movingMeshes = std::make_unique<moving_simple_mesh[]>(no_m_mesh);
 	square_model = std::make_unique<ubo_model[]>(no_mesh + no_m_mesh);
@@ -134,6 +146,9 @@ void vulkanApp::loadData() {
 		camera_thread.wait();
 	#endif
 
+	#endif
+
+
 /*#ifdef precalculated_player_camera
 	#ifdef detailed_timing
 		auto start6 = std::chrono::steady_clock::now();
@@ -144,6 +159,28 @@ void vulkanApp::loadData() {
 		std::cout << "\t Camera reading took \t\t\t" << std::chrono::duration <double, std::milli>(end6 - start6).count() << "ms" << std::endl;
 	#endif
 #endif*/
+
+
+	#ifdef testing3
+	try {
+		files::simple_static::read_mesh(staticMeshes);
+		no_mesh = staticMeshes.size();
+		files::simple_static::read_texture(static_tex);
+		files::simple_static::read_ubo(static_ubo);
+
+
+		files::simple_moving::read_mesh(movingMeshes);
+		no_m_mesh = movingMeshes.size();
+		files::simple_moving::read_texture(moving_tex);
+		files::simple_moving::read_ubo(moving_ubo);
+	}
+	catch (const std::exception& e) {
+		std::cout << "Failed to read data" << std::endl;
+		error::data_message = e.what();
+		error::was_error_data = true;
+	}
+
+	#endif
 
 #ifdef timing
 	auto end = std::chrono::steady_clock::now();
@@ -242,6 +279,10 @@ void vulkanApp::initVulkan(std::future<void>* data_thread) {
 	createFramebuffers();
 
 	data_thread->wait();
+	if (error::was_error_data) {
+		throw std::runtime_error(error::data_message);
+	}
+
 
 	createTextureImage();
 
@@ -366,10 +407,12 @@ void vulkanApp::cleanup() {
 	vkDestroySurfaceKHR(instance, surface, nullptr);
 	vkDestroyInstance(instance, nullptr);
 
+	#ifndef testing3
 	staticMeshes.reset();
 	square_model.reset();
 	movingMeshes.reset();
 	imagePixels.reset();
+	#endif
 
 	#ifdef precalculated_player_camera
 		camera_positions.reset();
@@ -517,12 +560,24 @@ void vulkanApp::updateUniformBuffers(uint32_t currentImage) {
 //#pragma omp parallel for
 	for (uint32_t i = 0; i < no_mesh; i++) {
 		uint64_t local_framecounter;
+		#ifndef testing3
 		if (global::framecounter > square_model[i].total_frames - 1) {
 			local_framecounter = square_model[i].total_frames - 1;
 		} else {
 			local_framecounter = global::framecounter;
 		}
 		staticMeshes[i].ub.ubo.model = square_model[i].frame(local_framecounter);
+		#endif
+
+		#ifdef testing3
+		if (global::framecounter > static_ubo[i].total_frames - 1) {
+			local_framecounter = static_ubo[i].total_frames - 1;
+		} else {
+			local_framecounter = global::framecounter;
+		}
+		staticMeshes[i].ub.ubo.model = static_ubo[i].frame(local_framecounter);
+		#endif
+
 #ifdef player_camera
 		staticMeshes[i].ub.ubo.view = global::camera.view();
 #else
@@ -547,6 +602,7 @@ void vulkanApp::updateUniformBuffers(uint32_t currentImage) {
 	}
 
 //#pragma omp parallel for
+#ifndef testing3
 	for (uint32_t i = no_mesh; i < no_mesh + no_m_mesh; i++) {
 		int j = i - no_mesh;
 		uint64_t local_framecounter;
@@ -556,6 +612,19 @@ void vulkanApp::updateUniformBuffers(uint32_t currentImage) {
 			local_framecounter = global::framecounter;
 		}
 		movingMeshes[j].ub.ubo.model = square_model[i].frame(local_framecounter);
+	#endif
+
+	#ifdef testing3
+	for (uint32_t j = 0;j < no_m_mesh; j++) {
+		uint64_t local_framecounter;
+		if (global::framecounter > moving_ubo[j].total_frames - 1) {
+			local_framecounter = moving_ubo[j].total_frames - 1;
+		} else {
+			local_framecounter = global::framecounter;
+		}
+		movingMeshes[j].ub.ubo.model = moving_ubo[j].frame(local_framecounter);
+	#endif
+
 #ifdef player_camera
 		movingMeshes[j].ub.ubo.view = global::camera.view();
 #else
@@ -572,8 +641,8 @@ void vulkanApp::updateUniformBuffers(uint32_t currentImage) {
 #endif
 
 #ifdef testing2
-	movingMeshes[i].ub.lo.test1 = glm::mat4(1.0f);
-	movingMeshes[i].ub.lo.test2 = glm::mat4(1.0f);
+	movingMeshes[j].ub.lo.test1 = glm::mat4(1.0f);
+	movingMeshes[j].ub.lo.test2 = glm::mat4(1.0f);
 #endif
 
 			movingMeshes[j].ub.ubo.proj = glm::perspective(glm::radians(vk_settings::fov), swapChainExtent.width / (float)swapChainExtent.height, vk_settings::near_plane, vk_settings::far_plane);
@@ -1355,7 +1424,6 @@ void vulkanApp::createCommandPool() {
 	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 	poolInfo.flags = 0;
-
 	if (!vk_check_result(vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool))) {
 		throw std::runtime_error("failed to create command pool!");
 	}
@@ -1421,6 +1489,7 @@ void vulkanApp::createTextureImage() {
 	}*/
 
 //#pragma omp parallel for
+#ifndef testing3
 	for (uint32_t i = 0; i < no_mesh; i++) {
 		staticMeshes[i].createTexture(imagePixels[i], device, physicalDevice, commandPool, graphicsQueue);
 	}
@@ -1430,6 +1499,18 @@ void vulkanApp::createTextureImage() {
 		uint32_t j = i - no_mesh;
 		movingMeshes[j].createTexture(imagePixels[i], device, physicalDevice, commandPool, graphicsQueue);
 	}
+#endif
+
+#ifdef testing3
+for (uint32_t i = 0; i < no_mesh; i++) {
+	staticMeshes[i].createTexture(static_tex[i], device, physicalDevice, commandPool, graphicsQueue);
+}
+
+//#pragma omp parallel for
+for (uint32_t i = 0; i < no_m_mesh; i++) {
+	movingMeshes[i].createTexture(moving_tex[i], device, physicalDevice, commandPool, graphicsQueue);
+}
+#endif
 	/*
 #pragma omp parallel for
 	for (int i = 0; i < no_images; i++) {

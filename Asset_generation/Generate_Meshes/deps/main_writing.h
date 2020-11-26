@@ -4,10 +4,12 @@
 #include "global.h"
 #include "helper.h"
 #include <string>
+#include "static_mesh.h"
+#include "moving_mesh.h"
 
 const std::string file_extension = ".bin";
 const std::string file_location = "/home/george/Documents/Projects/Major-3D/3D-drawing/Meshes/";
-
+/*
 inline void fillData() {
   //helper function to fill the required array for the data required for reading the static meshes easily
 
@@ -60,8 +62,129 @@ inline void fillt_data() {
     global::texture_data[i + 1] = global::moving_texture_ids[j] + static_size;
   }
 }
+*/
+
+template<typename T>  //array type that has .size() of static_mesh
+void write_static(const T meshes, const std::string file_location) {
+  //writing the meshes
+  for (unsigned k = 0; k < meshes.size(); k++) {
+    //for each mesh
+    //writing vertex array
+    std::ofstream output_vertex(file_location + "vertex_simple_static_" + std::to_string(k) + ".bin", std::ios::binary);
+    output_vertex.write((char*)&meshes[k].Vertices[0], sizeof(Vertex) * meshes[k].Vertices.size());
+    output_vertex.close();
+
+    //writing index array
+    std::ofstream output_indices(file_location + "indices_simple_static_" + std::to_string(k) + ".bin", std::ios::binary);
+    output_indices.write((char*)&meshes[k].Indices[0], sizeof(uint32_t) * meshes[k].Indices.size() );
+    output_indices.close();
+
+    std::ofstream output_movement(file_location + "movement_simple_static_" + std::to_string(k) + ".bin", std::ios::binary);
+    output_movement.write((char*)&meshes[k].Movement[0], sizeof(move) * meshes[k].Movement.size() );
+    output_movement.close();
+  }
+
+  //filling data arrays to be written to file
+  std::array<unsigned, meshes.size() * 2 + 1> data;
+  data[0] = meshes.size();
+
+  std::array<unsigned, meshes.size() + 1> data_ubo;
+  data_ubo[0] = meshes.size();
+
+  std::array<uint32_t, meshes.size() + 1> tex;
+  tex[0] = meshes.size();
+
+  unsigned k = 0, l = 0, m =0;
+  for (unsigned i = 0; i < meshes.size(); i++) {
+    data[++k] = meshes[i].Vertices.size();
+    data[++k] = meshes[i].Indices.size();
+    //std::cout << meshes[i].Indices.size() << std::endl;
+    data_ubo[++l] = meshes[i].Movement.size();
+    tex[++m] = meshes[i].texture_id;
+  }
 
 
+
+  //writing data
+  std::ofstream output_data(file_location + "data_s_mesh.bin", std::ios::binary);
+  output_data.write( (char*)&data[0], sizeof(unsigned) * data.size());
+  output_data.close();
+
+  std::ofstream ubo_data(file_location + "data_s_ubo.bin", std::ios::binary);
+  ubo_data.write( (char*)&data_ubo[0], sizeof(unsigned) * data_ubo.size() );
+  ubo_data.close();
+
+  std::ofstream textures(file_location + "tex_s.bin", std::ios::binary);
+  textures.write( (char*)&tex[0], sizeof(uint32_t) * tex.size() );
+  textures.close();
+
+}
+
+template<typename T>  //array type that has .size() of moving_mesh
+void write_moving(const T meshes, const std::string file_location) {
+  //writing the meshes
+  for (unsigned k = 0; k < meshes.size(); k++) {
+    //for each mesh
+
+    //writing vertex array
+    for (unsigned i = 0; i < meshes[k].Vertices.size(); i++) {
+      //for each frame
+      std::ofstream output_vertex(file_location + "vertex_simple_moving_" + std::to_string(k) + "_" + std::to_string(i) + ".bin", std::ios::binary);
+      output_vertex.write((char*)&meshes[k].Vertices[i][0], sizeof(Vertex) * meshes[k].Vertices[i].size());
+      output_vertex.close();
+    }
+
+
+    //writing index array
+    std::ofstream output_indices(file_location + "indices_simple_moving_" + std::to_string(k) + ".bin", std::ios::binary);
+    output_indices.write((char*)&meshes[k].Indices[0], sizeof(uint32_t) * meshes[k].Indices.size() );
+    output_indices.close();
+
+    std::ofstream output_movement(file_location + "movement_simple_moving_" + std::to_string(k) + ".bin", std::ios::binary);
+    output_movement.write((char*)&meshes[k].Movement[0], sizeof(move) * meshes[k].Movement.size() );
+    output_movement.close();
+  }
+
+  //filling data arrays to be written to file
+  std::array<unsigned, meshes.size() * 3 + 1> data;
+  data[0] = meshes.size();
+
+  std::array<unsigned, meshes.size() + 1> data_ubo;
+  data_ubo[0] = meshes.size();
+
+  std::array<uint32_t, meshes.size() + 1> tex;
+  tex[0] = meshes.size();
+
+  unsigned k = 0, l = 0, m =0;
+  for (unsigned i = 0; i < meshes.size(); i++) {
+    data[++k] = meshes[i].Vertices[0].size(); //number of vertices
+    data[++k] = meshes[i].Indices.size();
+    //std::cout << meshes[i].Vertices.size() << std::endl;
+    data[++k] = meshes[i].Vertices.size();    //number of frames
+    data_ubo[++l] = meshes[i].Movement.size();
+    tex[++m] = meshes[i].texture_id;
+  }
+
+
+
+
+  //writing data
+  std::ofstream output_data(file_location + "data_m_mesh.bin", std::ios::binary);
+  output_data.write( (char*)&data[0], sizeof(unsigned) * data.size());
+  output_data.close();
+
+  std::ofstream ubo_data(file_location + "data_m_ubo.bin", std::ios::binary);
+  ubo_data.write( (char*)&data_ubo[0], sizeof(unsigned) * data_ubo.size() );
+  ubo_data.close();
+
+  std::ofstream textures(file_location + "tex_m.bin", std::ios::binary);
+  textures.write( (char*)&tex[0], sizeof(uint32_t) * tex.size() );
+  textures.close();
+
+}
+
+
+/*
 inline void write_all() {
   //---------------------------------------------------------------------------------------------------------------
   //writes meshes to files that are within the "all_vertices", "all_uvs", "all_indicies" vectors
@@ -129,3 +252,4 @@ inline void write_all() {
   std::ofstream output_textures(file_location + "t_data" + file_extension, std::ios::binary); output_textures.write((char*)&global::texture_data[0], sizeof(uint32_t) * global::texture_data.size()); output_textures.close();
 
 }
+*/

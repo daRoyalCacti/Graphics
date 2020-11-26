@@ -288,8 +288,9 @@ namespace files {
 
 
         for (int i = 0; i < static_cast<int>(no_image); i++) {
-          imagePixels[i].pixels = new uint8_t[images[image_ids[i]].size()];
-          std::copy(images[image_ids[i]].begin(), images[image_ids[i]].end(), imagePixels[i].pixels);
+          //imagePixels[i].pixels = new uint8_t[images[image_ids[i]].size()];
+          imagePixels[i].pixels.resize(images[image_ids[i]].size());
+          std::copy(images[image_ids[i]].begin(), images[image_ids[i]].end(), imagePixels[i].pixels.data());
           imagePixels[i].texWidth = image_dimensions[2 * image_ids[i]];
           imagePixels[i].texHeight = image_dimensions[2 * image_ids[i] + 1];
         }

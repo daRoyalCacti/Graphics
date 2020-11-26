@@ -17,20 +17,17 @@ namespace GBF {
 	void stagingBufferObject::create_buffer_vertex(VkDeviceSize bufferSize, VkDevice device, VkPhysicalDevice physicalDevice, VkBuffer* buffer,
 		VkDeviceMemory* bufferMemory, VkCommandPool commandPool, VkQueue graphicsQueue, std::vector<Vertex> vertices) {
 
-
 		Buffer buffer_raw(buffer, bufferMemory, bufferSize);
 		stagingBuffer.size = bufferSize;
 
 		stagingBuffer.create(device, physicalDevice, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 		buffer_raw.create(device, physicalDevice, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-
 		stagingBuffer.map(device);
 		stagingBuffer.copy_mem(vertices.data());
 		stagingBuffer.unmap(device);
 
 		stagingBuffer.copy_buffer(device, commandPool, graphicsQueue, &buffer_raw);
-
 	}
 
 	void stagingBufferObject::updateVertexBuffer(VkDevice device, VkBuffer* buffer, std::vector<Vertex> vertices, VkCommandPool commandPool, VkQueue graphicsQueue) {
@@ -73,7 +70,7 @@ namespace GBF {
 		stagingBuffer.copy_mem(pixels);
 		stagingBuffer.unmap(device);
 
-		delete [] pixels;
+		//delete [] pixels;
 
 		createImage(device, physicalDevice, texWidth, texHeight, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, *textureImage, *textureImageMemory);

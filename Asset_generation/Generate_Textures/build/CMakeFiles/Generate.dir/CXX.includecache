@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/george/Documents/Projects/Major-1/Asset_generation/Generate_Textures/dependencies/bitmap.h
+cstdint
+-
+string
+-
+vector
+-
+
+/home/george/Documents/Projects/Major-1/Asset_generation/Generate_Textures/dependencies/gradients.h
+bitmap.h
+/home/george/Documents/Projects/Major-1/Asset_generation/Generate_Textures/dependencies/bitmap.h
+helper.h
+/home/george/Documents/Projects/Major-1/Asset_generation/Generate_Textures/dependencies/helper.h
+
+/home/george/Documents/Projects/Major-1/Asset_generation/Generate_Textures/dependencies/main_writing.h
+bitmap.h
+/home/george/Documents/Projects/Major-1/Asset_generation/Generate_Textures/dependencies/bitmap.h
+fstream
+-
+
+/home/george/Documents/Projects/Major-1/Asset_generation/Generate_Textures/main.cpp
+iostream
+-
+array
+-
+dependencies/gradients.h
+/home/george/Documents/Projects/Major-1/Asset_generation/Generate_Textures/dependencies/gradients.h
+dependencies/main_writing.h
+/home/george/Documents/Projects/Major-1/Asset_generation/Generate_Textures/dependencies/main_writing.h
+

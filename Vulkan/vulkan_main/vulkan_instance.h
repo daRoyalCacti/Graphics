@@ -86,6 +86,7 @@ private:
 
 	VkDescriptorPool descriptorPool;
 
+	#ifndef testing3
 	std::unique_ptr<ubo_model[]> square_model;
 
 	std::unique_ptr<staticSimpleMesh[]> staticMeshes;
@@ -99,6 +100,20 @@ private:
 		std::unique_ptr<glm::vec3[]> camera_positions;
 		std::unique_ptr<float[]> camera_yaws;
 		std::unqiue_ptr<float[]> camera_pitchs;
+	#endif
+
+	#endif
+
+	#ifdef testing3
+		std::vector<ubo_model> static_ubo;
+		std::vector<staticSimpleMesh> staticMeshes;
+		std::vector<pixels> static_tex;
+
+		std::vector<ubo_model> moving_ubo;
+		std::vector<moving_simple_mesh> movingMeshes;
+		std::vector<pixels> moving_tex;
+
+		//NEED TO DO CAMERA STUFF
 	#endif
 
 

@@ -18,7 +18,7 @@ public:
 		GBF::stagingBufferObject sb;
 	#pragma omp critical
 		{
-		sb.create_buffer_image(imagePixels.texWidth, imagePixels.texHeight, device, physicalDevice, &textureImage, &textureImageMemory, commandPool, graphicsQueue, imagePixels.pixels);
+		sb.create_buffer_image(imagePixels.texWidth, imagePixels.texHeight, device, physicalDevice, &textureImage, &textureImageMemory, commandPool, graphicsQueue, imagePixels.pixels.data());
 		}
 		sb.cleanup(device); //WIP
 	}

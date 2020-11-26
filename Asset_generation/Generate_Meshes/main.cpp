@@ -1,5 +1,7 @@
 #include <iostream>
 #include <chrono>
+#include <array>
+
 #include "./deps/boring_test.h"
 #include "./deps/main_writing.h"
 #include "./deps/helper.h"
@@ -77,10 +79,14 @@ int main() {
   auto end0 = std::chrono::high_resolution_clock::now();
   std::cout << "Mesh generation took\t" << std::chrono::duration <double, std::milli>(end0 - start0).count() << "ms" << std::endl;
 
-  exit(EXIT_FAILURE);
+  //exit(EXIT_FAILURE);
 
   auto start1 = std::chrono::high_resolution_clock::now();
-  write_all();
+  std::array<static_mesh, 4> static_meshes = {cube, sphere, plane, sphere2};
+  std::array<moving_mesh, 1> moving_meshes = {basic};
+  write_static(static_meshes, "/home/george/Documents/Projects/Major-1/Assets/Meshes/test/");
+  write_moving(moving_meshes, "/home/george/Documents/Projects/Major-1/Assets/Meshes/test/");
+  //write_all();
   auto end1 = std::chrono::high_resolution_clock::now();
   std::cout << "File writing took\t" << std::chrono::duration <double, std::milli>(end1 - start1).count() << "ms" << std::endl;
 

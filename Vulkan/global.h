@@ -13,7 +13,8 @@
 //#define log_camera_vecs			//logs the camera vectors to standard output
 
 #define testing1	//shader has a vec2 foo parameter
-#define testing2 //requires testing1. shader has an example lighting struct
+#define testing2 	//requires testing1. shader has an example lighting struct
+#define testing3	//reading in the new data structures
 
 
 #ifndef NODEBUG

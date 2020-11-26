@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/george/Documents/Projects/Major-1/Asset_generation/Generate_Camera/dependencies/camera.h
+glm/glm.hpp
+-
+vector
+-
+
+/home/george/Documents/Projects/Major-1/Asset_generation/Generate_Camera/dependencies/examples.h
+glm/glm.hpp
+-
+
+/home/george/Documents/Projects/Major-1/Asset_generation/Generate_Camera/main.cpp
+iostream
+-
+glm/glm.hpp
+-
+fstream
+-
+dependencies/camera.h
+/home/george/Documents/Projects/Major-1/Asset_generation/Generate_Camera/dependencies/camera.h
+dependencies/examples.h
+/home/george/Documents/Projects/Major-1/Asset_generation/Generate_Camera/dependencies/examples.h
+
